@@ -1,7 +1,8 @@
-package org.summer.context.services;
+package org.summer.context.services.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.summer.context.services.ComponentScanner;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,16 +15,9 @@ import java.util.stream.Collectors;
 /**
  * A service that scans a base package for classes and filters them based on type.
  */
-public class SearchComponentService {
+public class ComponentScannerImpl implements ComponentScanner {
 
-    private static final Logger log = LogManager.getLogger(SearchComponentService.class);
-    private final String basePackage;
-    private final Set<File> filesSet;
-
-    public SearchComponentService(String basePackage) {
-        this.basePackage = basePackage.replace('.', '/');
-        filesSet = scanBasePackage();
-    }
+    private static final Logger log = LogManager.getLogger(ComponentScannerImpl.class);
 
     /**
      * Finds classes in the scanned package that match the specified type.
@@ -31,9 +25,11 @@ public class SearchComponentService {
      * @param type The class object representing the type to search for.
      * @return A list of classes that match the specified type.
      */
-    public <T> List<Object> findClassesByType(Class<T> type) {
+    public <T> List<Object> findClassesByType(Class<T> type, String basePackage) {
+        String packageUrl = basePackage.replace('.', '/');
+        Set<File> filesSet = scanBasePackage(packageUrl);
         return filesSet.stream()
-                .map(this::getClassNameFromFile)
+                .map(f -> this.getClassNameFromFile(f, packageUrl))
                 .map(this::loadClass)
                 .filter(Objects::nonNull)
                 .filter(obj -> !obj.isInterface() && !Modifier.isAbstract(obj.getModifiers()))
@@ -61,11 +57,11 @@ public class SearchComponentService {
      *
      * @return A set of {@code File} objects representing the {@code .class} files found in the base package.
      */
-    private Set<File> scanBasePackage() {
+    private Set<File> scanBasePackage(String basePackage) {
         Set<File> files = new HashSet<>();
         try {
             ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-            Enumeration<URL> resources = classLoader.getResources(this.basePackage);
+            Enumeration<URL> resources = classLoader.getResources(basePackage);
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
                 File file = new File(resource.toURI());
@@ -106,9 +102,9 @@ public class SearchComponentService {
      * @param file The {@code File} object representing the {@code .class} file.
      * @return The fully qualified name of the desired class
      */
-    private String getClassNameFromFile(File file) {
+    private String getClassNameFromFile(File file, String packageUrl) {
         String absolutePath = file.getAbsolutePath();
-        String relativePath = absolutePath.substring(absolutePath.indexOf(basePackage), absolutePath.length() - 6);
+        String relativePath = absolutePath.substring(absolutePath.indexOf(packageUrl), absolutePath.length() - 6);
         return relativePath.replace(File.separatorChar, '.');
     }
 }
