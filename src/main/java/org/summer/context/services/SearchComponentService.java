@@ -20,8 +20,8 @@ public class SearchComponentService {
     private final String basePackage;
     private final Set<File> filesSet;
 
-    public SearchComponentService(String pathToPackage) {
-        this.basePackage = pathToPackage.replace('.', '/');
+    public SearchComponentService(String basePackage) {
+        this.basePackage = basePackage.replace('.', '/');
         filesSet = scanBasePackage();
     }
 
