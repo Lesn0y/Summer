@@ -7,11 +7,12 @@ import java.util.List;
 
 public class IntensiveContext {
 
-    private final ComponentScanner searchService = new ComponentScannerImpl();
+    private final ComponentScanner searchService;
     private final String basePackage;
 
     public IntensiveContext(String basePackage) {
         this.basePackage = basePackage;
+        this.searchService = new ComponentScannerImpl();
     }
 
     public <T> T getObject(Class<T> type) {
