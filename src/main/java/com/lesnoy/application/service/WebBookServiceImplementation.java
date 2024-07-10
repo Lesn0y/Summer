@@ -1,4 +1,7 @@
 package com.lesnoy.application.service;
 
-public class WebBookServiceImplementation implements BookService {
+import org.summer.context.annotation.IntensiveComponent;
+
+@IntensiveComponent
+public class WebBookServiceImplementation {
 }
