@@ -21,7 +21,6 @@ public class InjectionServiceImpl implements InjectionService {
      * @param instance    The instance into which dependencies should be injected.
      * @param scanner     The scanner used to find dependency classes.
      * @param basePackage The base package to scan for dependency classes.
-     * @param <T>         The type of the instance.
      * @return The instance with dependencies injected.
      * @throws RuntimeException if there is an error during dependency injection.
      */
@@ -31,7 +30,7 @@ public class InjectionServiceImpl implements InjectionService {
             if (field.isAnnotationPresent(IntensiveAutowired.class)) {
                 field.setAccessible(true);
                 try {
-                    Class<?> aClass = scanner.findClassesByType(field.getType(), basePackage);
+                    Class<?> aClass = scanner.findClassByType(field.getType(), basePackage);
                     T componentClass = (T) DependencyFactory.createInstance(aClass);
 
                     field.set(instance, componentClass);
