@@ -13,19 +13,23 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * A service that scans a base package for classes and filters them based on type.
+ * Class that scans a base package for classes and filters them based on type.
  */
 public class ComponentScannerImpl implements ComponentScanner {
 
     private static final Logger log = LogManager.getLogger(ComponentScannerImpl.class);
 
+
     /**
      * Finds classes in the scanned package that match the specified type.
      *
      * @param type The class object representing the type to search for.
-     * @return A list of classes that match the specified type.
+     * @param basePackage The package to scan for components
+     * @return A class that matches the specified type.
+     * @throws NoImplementationException If no implementation is found for the specified type.
+     * @throws MultipleImplementationsException If multiple implementations are found for the specified type.
      */
-    public <T> Class<?> findClassesByType(Class<T> type, String basePackage) {
+    public <T> Class<?> findClassByType(Class<T> type, String basePackage) throws NoImplementationException, MultipleImplementationsException{
         String packageUrl = basePackage.replace('.', '/');
         Set<File> filesSet = scanBasePackage(packageUrl);
 
