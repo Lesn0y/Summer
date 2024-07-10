@@ -1,8 +1,7 @@
-package org.summer.context.services.impl;
+package org.summer.context.scanner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.summer.context.services.ComponentScanner;
 
 import java.io.File;
 import java.io.IOException;
