@@ -1,13 +1,10 @@
 package org.summer.context;
 
+import org.summer.context.dependency.DependencyFactory;
 import org.summer.context.injection.InjectionService;
 import org.summer.context.injection.InjectionServiceImpl;
 import org.summer.context.scanner.ComponentScanner;
 import org.summer.context.scanner.ComponentScannerImpl;
-import org.summer.context.scanner.exceptions.MultipleImplementationsException;
-import org.summer.context.scanner.exceptions.NoImplementationException;
-
-import java.util.List;
 
 public class IntensiveContext {
 
@@ -22,15 +19,9 @@ public class IntensiveContext {
     }
 
     public <T> T getObject(Class<T> type) {
-        List<Object> components = componentScanner.findClassesByType(type, basePackage);
+        Class<?> component = componentScanner.findClassesByType(type, basePackage);
 
-        if (components.isEmpty()) {
-            throw new NoImplementationException("No implementation found for: " + type.getName());
-        }
-        if (components.size() > 1) {
-            throw new MultipleImplementationsException("Multiple implementations found for: " + type.getName());
-        }
-
-        return null;
+        T componentClass = (T) DependencyFactory.createInstance(component);
+        return injectionService.injectDependencies(componentClass, componentScanner, basePackage);
     }
 }

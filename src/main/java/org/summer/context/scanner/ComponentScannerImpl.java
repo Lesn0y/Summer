@@ -2,6 +2,8 @@ package org.summer.context.scanner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.summer.context.scanner.exceptions.MultipleImplementationsException;
+import org.summer.context.scanner.exceptions.NoImplementationException;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +11,6 @@ import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A service that scans a base package for classes and filters them based on type.
@@ -24,16 +25,25 @@ public class ComponentScannerImpl implements ComponentScanner {
      * @param type The class object representing the type to search for.
      * @return A list of classes that match the specified type.
      */
-    public <T> List<Object> findClassesByType(Class<T> type, String basePackage) {
+    public <T> Class<?> findClassesByType(Class<T> type, String basePackage) {
         String packageUrl = basePackage.replace('.', '/');
         Set<File> filesSet = scanBasePackage(packageUrl);
-        return filesSet.stream()
+
+        List<? extends Class<?>> components = filesSet.stream()
                 .map(f -> this.getClassNameFromFile(f, packageUrl))
                 .map(this::loadClass)
                 .filter(Objects::nonNull)
                 .filter(obj -> !obj.isInterface() && !Modifier.isAbstract(obj.getModifiers()))
                 .filter(type::isAssignableFrom)
-                .collect(Collectors.toList());
+                .toList();
+
+        if (components.isEmpty()) {
+            throw new NoImplementationException("No implementation found for: " + type.getName());
+        }
+        if (components.size() > 1) {
+            throw new MultipleImplementationsException("Multiple implementations found for: " + type.getName());
+        }
+        return components.get(0);
     }
 
     /**
